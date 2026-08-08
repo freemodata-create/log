@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Admin Panel - Generate User</title>
+  <title>Admin Panel - SANZ DEVELOPER</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
@@ -15,6 +15,10 @@
       color: #e1e4ed;
       min-height: 100vh;
       padding: 20px;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
     .bg-layer {
       position: fixed; inset: 0; z-index: 0;
@@ -102,13 +106,12 @@
       font-family: inherit;
       outline: none;
       transition: border-color 0.2s;
+      -webkit-user-select: text;
+      user-select: text;
     }
     .input-group input:focus {
       border-color: #4f8fff;
       box-shadow: 0 0 0 3px rgba(79,143,255,0.1);
-    }
-    .input-group input::placeholder {
-      color: #5a6070;
     }
     .btn {
       padding: 11px 24px;
@@ -140,6 +143,12 @@
       border: 1px solid rgba(52,211,153,0.2);
     }
     .btn-success:hover { background: rgba(52,211,153,0.25); }
+    .btn-warning {
+      background: rgba(251,191,36,0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(251,191,36,0.2);
+    }
+    .btn-warning:hover { background: rgba(251,191,36,0.25); }
     .btn-sm { padding: 6px 14px; font-size: 0.7rem; }
     .btn-block { width: 100%; }
 
@@ -227,6 +236,7 @@
       background: rgba(79,143,255,0.15);
       border-color: #4f8fff;
     }
+
     .stats-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -241,6 +251,60 @@
     }
     .stat-item .num { font-size: 1.5rem; font-weight: 700; color: #fff; }
     .stat-item .label { font-size: 0.6rem; color: #8890a5; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .export-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 12px;
+    }
+    .export-box textarea {
+      width: 100%;
+      padding: 12px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      color: #6ee7b7;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      resize: vertical;
+      min-height: 60px;
+      outline: none;
+      -webkit-user-select: text;
+      user-select: text;
+    }
+    .export-box textarea:focus {
+      border-color: #4f8fff;
+    }
+    .export-box .copy-hint {
+      font-size: 0.65rem;
+      color: #8890a5;
+      margin-top: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .btn-copy {
+      padding: 4px 14px;
+      background: rgba(79,143,255,0.15);
+      border: 1px solid rgba(79,143,255,0.2);
+      border-radius: 8px;
+      color: #4f8fff;
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .btn-copy:hover {
+      background: rgba(79,143,255,0.25);
+    }
+
+    @media (max-width: 600px) {
+      .card { padding: 20px; }
+    }
   </style>
 </head>
 <body>
@@ -283,13 +347,13 @@
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
         <h2>👥 Daftar User</h2>
-        <div style="display:flex;gap:8px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn btn-danger btn-sm" onclick="deleteAllUsers()">🗑️ Hapus Semua</button>
-          <button class="btn btn-success btn-sm" onclick="exportUsers()">📤 Export</button>
+          <button class="btn btn-success btn-sm" onclick="exportUsers()">📤 Download JSON</button>
         </div>
       </div>
 
-      <div class="stats-row" id="statsRow">
+      <div class="stats-row">
         <div class="stat-item"><div class="num" id="totalUsers">0</div><div class="label">Total User</div></div>
       </div>
 
@@ -311,22 +375,43 @@
       </div>
     </div>
 
-    <!-- Info Login -->
-    <div class="card" style="background:rgba(79,143,255,0.05);border:1px solid rgba(79,143,255,0.15);">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <span style="font-size:1.5rem;">🔐</span>
-        <div>
-          <div style="font-weight:600;">Link Login untuk User</div>
-          <div style="color:#8890a5;font-size:0.8rem;">
-            Buka <a href="https://sanzengine.vercel.app/" target="_blank" style="color:#4f8fff;">https://sanzengine.vercel.app/</a> 
-            dan login pakai username & password di atas
+    <!-- EXPORT KE LOGIN PAGE -->
+    <div class="card" style="border:1px solid rgba(79,143,255,0.2);background:rgba(79,143,255,0.05);">
+      <h2 style="display:flex;align-items:center;gap:10px;">📤 Export Data ke Login Page</h2>
+      <p style="color:#8890a5;font-size:0.85rem;margin-bottom:12px;">
+        Copy data di bawah, lalu tempel di halaman login untuk import user.
+      </p>
+
+      <div class="export-box">
+        <label style="font-size:0.7rem;color:#8890a5;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">
+          📋 Data User (JSON) - Copy ini
+        </label>
+        <textarea id="exportData" readonly></textarea>
+        <div class="copy-hint">
+          <span>Data akan otomatis terupdate</span>
+          <button class="btn-copy" onclick="copyExportData()">📋 Copy</button>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;padding:12px 16px;background:rgba(52,211,153,0.08);border-radius:10px;border:1px solid rgba(52,211,153,0.15);">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span style="font-size:1.2rem;">🔗</span>
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;">Cara Import di Halaman Login</div>
+            <div style="color:#8890a5;font-size:0.75rem;">
+              1. Copy data JSON di atas<br />
+              2. Buka <a href="https://sanzengine.vercel.app/" target="_blank" style="color:#4f8fff;">https://sanzengine.vercel.app/</a><br />
+              3. Paste data di textarea yang tersedia<br />
+              4. Klik "Import Data"<br />
+              5. Login pakai username & password yang sudah dibuat
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <div class="footer">
-      © 2026 <strong>Sanz Developer</strong> · Admin Panel v1.0
+      © 2026 <strong>Sanz Developer</strong> · Admin Panel
     </div>
   </div>
 
@@ -341,6 +426,17 @@
 
       function saveUsers(users) {
         localStorage.setItem(DB_KEY, JSON.stringify(users));
+        updateExportData();
+      }
+
+      function updateExportData() {
+        var users = getUsers();
+        var textarea = document.getElementById('exportData');
+        if (users.length === 0) {
+          textarea.value = '[]';
+        } else {
+          textarea.value = JSON.stringify(users, null, 2);
+        }
       }
 
       function renderUsers() {
@@ -352,6 +448,7 @@
 
         if (users.length === 0) {
           tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="icon">📭</div><p>Belum ada user. Buat user baru di atas!</p></div></td></tr>';
+          updateExportData();
           return;
         }
 
@@ -369,6 +466,7 @@
           html += '</tr>';
         });
         tbody.innerHTML = html;
+        updateExportData();
       }
 
       function escapeHtml(text) {
@@ -421,7 +519,6 @@
         }
 
         var users = getUsers();
-        // Cek duplikat
         if (users.some(function(u) { return u.username.toLowerCase() === username.toLowerCase(); })) {
           return showAlert('Username "' + username + '" sudah ada!', 'error');
         }
@@ -467,21 +564,48 @@
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
         a.href = url;
-        a.download = 'users_backup_' + new Date().toISOString().slice(0,10) + '.json';
+        a.download = 'users_' + new Date().toISOString().slice(0,10) + '.json';
         a.click();
         URL.revokeObjectURL(url);
         showAlert('Export berhasil!', 'success');
+      };
+
+      window.copyExportData = function() {
+        var textarea = document.getElementById('exportData');
+        textarea.select();
+        textarea.setSelectionRange(0, 99999);
+        try {
+          document.execCommand('copy');
+          showAlert('Data berhasil dicopy!', 'success');
+        } catch(e) {
+          showAlert('Gagal copy, silakan copy manual.', 'error');
+        }
       };
 
       // Render awal
       renderUsers();
 
       // Proteksi
+      document.addEventListener('copy', function(e) {
+        if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return true;
+        e.preventDefault();
+        return false;
+      }, true);
+
+      document.addEventListener('cut', function(e) {
+        if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return true;
+        e.preventDefault();
+        return false;
+      }, true);
+
       document.addEventListener('keydown', function(e) {
         if (e.key === 'F12' || e.keyCode === 123) {
           e.preventDefault(); return false;
         }
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase())) {
+          e.preventDefault(); return false;
+        }
+        if ((e.ctrlKey || e.metaKey) && ['u'].includes(e.key.toLowerCase())) {
           e.preventDefault(); return false;
         }
       }, true);
