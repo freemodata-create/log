@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>SANZ DEV — Login Log Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0b0d14;
+      color: #e1e4ed;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    *:focus { outline: none !important; box-shadow: none !important; }
+    *:active { outline: none !important; -webkit-tap-highlight-color: transparent !important; }
+
+    .bg-layer {
+      position: fixed; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse 80% 60% at 30% 20%, rgba(64, 128, 255, 0.05) 0%, transparent 55%),
+                  radial-gradient(ellipse 60% 70% at 70% 80%, rgba(100, 200, 180, 0.04) 0%, transparent 55%),
+                  #0b0d14;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative; z-index: 10; max-width: 1200px; margin: 0 auto; padding: 20px;
+      display: flex; flex-direction: column; gap: 20px; min-height: 100vh;
+    }
+
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(22,26,38,0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 16px 22px;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .header-brand { font-weight: 700; font-size: 1.15rem; color: #fff; }
+    .header-brand span { color: #4f8fff; }
+    .header-domain { font-size: 0.7rem; color: #5a6070; letter-spacing: 0.5px; }
+    .live-badge {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3);
+      padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; color: #34d399;
+    }
+    .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .stats-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px;
+    }
+    .stat-box {
+      background: rgba(22,26,38,0.75); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 20px;
+      text-align: center;
+    }
+    .stat-value { font-size: 1.8rem; font-weight: 700; color: #fff; }
+    .stat-label { font-size: 0.68rem; color: #8890a5; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; }
+    .filter-bar input {
+      flex: 1; min-width: 200px; padding: 12px 16px;
+      background: rgba(22,26,38,0.75); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+      color: #fff; font-size: 0.85rem; font-family: inherit; outline: none;
+    }
+    .filter-bar input:focus { border-color: #4f8fff; }
+    .btn {
+      padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 0.8rem;
+      font-family: inherit; cursor: pointer; border: none; transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-primary { background: #4f8fff; color: #fff; }
+    .btn-primary:hover { background: #6aa5ff; }
+    .btn-danger { background: rgba(248,113,113,0.15); border: 1px solid rgba(248,113,113,0.3); color: #f87171; }
+    .btn-danger:hover { background: rgba(248,113,113,0.25); }
+
+    .table-card {
+      background: rgba(22,26,38,0.75); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.05); border-radius: 18px; overflow: hidden;
+    }
+    .table-header {
+      display: grid; grid-template-columns: 1.5fr 1.5fr 1.2fr 1fr 1fr 1.5fr;
+      padding: 14px 20px; background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #8890a5;
+    }
+    .table-body { max-height: 500px; overflow-y: auto; }
+    .table-row {
+      display: grid; grid-template-columns: 1.5fr 1.5fr 1.2fr 1fr 1fr 1.5fr;
+      padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 0.78rem;
+      align-items: center; transition: background 0.15s;
+    }
+    .table-row:hover { background: rgba(255,255,255,0.015); }
+    .table-row:last-child { border-bottom: none; }
+    .user-cell { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+    .user-av { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg,#4f8fff,#6366f1); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: #fff; }
+    .chip {
+      padding: 4px 10px; border-radius: 14px; font-size: 0.65rem; font-weight: 500;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .chip-android { background: rgba(52,211,153,0.1); color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
+    .chip-desktop { background: rgba(79,143,255,0.1); color: #4f8fff; border: 1px solid rgba(79,143,255,0.2); }
+    .time-mono { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #8890a5; }
+    .empty { text-align: center; padding: 50px 20px; color: #5a6070; }
+
+    .footer {
+      text-align: center; padding: 10px 0; color: #4a5060; font-size: 0.65rem;
+      letter-spacing: 0.5px; margin-top: auto;
+    }
+    .footer span { color: #4f8fff; }
+
+    @media (max-width: 768px) {
+      .table-header, .table-row { grid-template-columns: 1.5fr 1.2fr 1fr 1fr; }
+      .table-header > *:nth-child(4), .table-row > *:nth-child(4),
+      .table-header > *:nth-child(6), .table-row > *:nth-child(6) { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-layer"></div>
+
+  <div class="container">
+    <div class="header">
+      <div>
+        <div class="header-brand">SANZ<span>DEV</span> · Login Log</div>
+        <div class="header-domain">logsanz.vercel.app</div>
+      </div>
+      <div class="live-badge"><span class="live-dot"></span> LIVE — Firebase Realtime</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-value" id="totalLogins">0</div><div class="stat-label">Total Login</div></div>
+      <div class="stat-box"><div class="stat-value" id="uniqueDevices">0</div><div class="stat-label">Device Unik</div></div>
+      <div class="stat-box"><div class="stat-value" id="androidCount">0</div><div class="stat-label">Android</div></div>
+      <div class="stat-box"><div class="stat-value" id="desktopCount">0</div><div class="stat-label">Desktop</div></div>
+    </div>
+
+    <div class="filter-bar">
+      <input type="text" id="searchInput" placeholder="Cari username, device, OS..." oninput="renderTable()" />
+      <button class="btn btn-primary" onclick="renderTable()">Refresh</button>
+      <button class="btn btn-danger" onclick="clearLogs()">Hapus Log</button>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <span>Username</span><span>Device</span><span>OS</span><span>IP</span><span>Browser</span><span>Waktu</span>
+      </div>
+      <div class="table-body" id="tableBody">
+        <div class="empty">Menghubungkan ke Firebase...</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      © 2026 <span>Sanz Developer</span> · logsanz.vercel.app
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  <script>
+    (function() {
+
+      // GANTI dengan config Firebase kamu (sama dengan yang di sanzengine.vercel.app)
+      var firebaseConfig = {
+  apiKey: "AIzaSyBxXQtr_zdh4atdliKGOZFprN3REPwvrro",
+  authDomain: "sanzdev-2006b.firebaseapp.com",
+  databaseURL: "https://sanzdev-2006b-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "sanzdev-2006b",
+  storageBucket: "sanzdev-2006b.firebasestorage.app",
+  messagingSenderId: "370279836532",
+  appId: "1:370279836532:web:cb8fcf430242047aabda21"
+};
+
+      firebase.initializeApp(firebaseConfig);
+      var db = firebase.database();
+      var allLogs = [];
+
+      function formatDateTime(iso) {
+        var d = new Date(iso);
+        var days = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+        var months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+        var jam = String(d.getHours()).padStart(2,'0');
+        var mnt = String(d.getMinutes()).padStart(2,'0');
+        var dtk = String(d.getSeconds()).padStart(2,'0');
+        return days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ' · ' + jam + ':' + mnt + ':' + dtk;
+      }
+
+      function escapeHTML(str) {
+        var div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+      }
+
+      window.renderTable = function() {
+        var search = (document.getElementById('searchInput').value || '').toLowerCase();
+        var logs = allLogs;
+
+        if (search) {
+          logs = logs.filter(function(l) {
+            return (l.username||'').toLowerCase().includes(search) ||
+                   (l.device||'').toLowerCase().includes(search) ||
+                   (l.os||'').toLowerCase().includes(search) ||
+                   (l.browser||'').toLowerCase().includes(search) ||
+                   (l.ip||'').toLowerCase().includes(search);
+          });
+        }
+
+        logs.sort(function(a, b) { return new Date(b.timestamp) - new Date(a.timestamp); });
+
+        var tbody = document.getElementById('tableBody');
+        if (logs.length === 0) {
+          tbody.innerHTML = '<div class="empty">Tidak ada log ditemukan.</div>';
+        } else {
+          tbody.innerHTML = logs.map(function(log) {
+            return '<div class="table-row">' +
+              '<div class="user-cell"><div class="user-av">' + escapeHTML((log.username||'?')[0].toUpperCase()) + '</div>' + escapeHTML(log.username||'Unknown') + '</div>' +
+              '<div>' + escapeHTML(log.device||'-') + '</div>' +
+              '<div><span class="chip ' + (log.isAndroid ? 'chip-android' : 'chip-desktop') + '">' + (log.isAndroid ? '🤖' : '💻') + ' ' + escapeHTML(log.os||'-') + ' ' + escapeHTML(log.osVersion||'') + '</span></div>' +
+              '<div style="font-family:monospace;font-size:0.7rem;">' + escapeHTML(log.ip||'-') + '</div>' +
+              '<div style="font-size:0.7rem;">' + escapeHTML(log.browser||'-') + '</div>' +
+              '<div class="time-mono">' + formatDateTime(log.timestamp) + '</div>' +
+              '</div>';
+          }).join('');
+        }
+
+        document.getElementById('totalLogins').textContent = allLogs.length;
+        var devices = allLogs.map(function(l) { return l.device; }).filter(function(v, i, a) { return a.indexOf(v) === i; });
+        document.getElementById('uniqueDevices').textContent = devices.length;
+        document.getElementById('androidCount').textContent = allLogs.filter(function(l) { return l.isAndroid; }).length;
+        document.getElementById('desktopCount').textContent = allLogs.filter(function(l) { return !l.isAndroid; }).length;
+      };
+
+      window.clearLogs = function() {
+        if (confirm('Hapus semua log login dari server?')) {
+          db.ref('logs').remove();
+          allLogs = [];
+          renderTable();
+        }
+      };
+
+      // Realtime listener — setiap ada data baru langsung muncul
+      db.ref('logs').on('value', function(snapshot) {
+        var data = snapshot.val();
+        allLogs = [];
+        if (data) {
+          Object.keys(data).forEach(function(key) {
+            allLogs.push(data[key]);
+          });
+        }
+        renderTable();
+      });
+
+      renderTable();
+    })();
+  </script>
+</body>
+</html>
