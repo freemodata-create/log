@@ -3,264 +3,496 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>SANZ DEV — Login Log Monitor</title>
+  <title>Admin Panel - Generate User</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-
     body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
       background: #0b0d14;
       color: #e1e4ed;
       min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
+      padding: 20px;
     }
-
-    *:focus { outline: none !important; box-shadow: none !important; }
-    *:active { outline: none !important; -webkit-tap-highlight-color: transparent !important; }
-
     .bg-layer {
       position: fixed; inset: 0; z-index: 0;
-      background: radial-gradient(ellipse 80% 60% at 30% 20%, rgba(64, 128, 255, 0.05) 0%, transparent 55%),
-                  radial-gradient(ellipse 60% 70% at 70% 80%, rgba(100, 200, 180, 0.04) 0%, transparent 55%),
+      background: radial-gradient(ellipse 80% 60% at 30% 20%, rgba(64,128,255,0.08) 0%, transparent 55%),
+                  radial-gradient(ellipse 60% 70% at 70% 80%, rgba(100,200,180,0.05) 0%, transparent 55%),
                   #0b0d14;
       pointer-events: none;
     }
-
     .container {
-      position: relative; z-index: 10; max-width: 1200px; margin: 0 auto; padding: 20px;
-      display: flex; flex-direction: column; gap: 20px; min-height: 100vh;
+      position: relative; z-index: 10;
+      max-width: 900px; margin: 0 auto;
     }
-
+    .card {
+      background: rgba(22,26,38,0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 14px 30px rgba(0,0,0,0.4);
+    }
     .header {
-      display: flex; align-items: center; justify-content: space-between;
-      background: rgba(22,26,38,0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 16px 22px;
-      flex-wrap: wrap; gap: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
     }
-    .header-brand { font-weight: 700; font-size: 1.15rem; color: #fff; }
-    .header-brand span { color: #4f8fff; }
-    .header-domain { font-size: 0.7rem; color: #5a6070; letter-spacing: 0.5px; }
-    .live-badge {
-      display: flex; align-items: center; gap: 8px;
-      background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3);
-      padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; color: #34d399;
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #fff;
     }
-    .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-    .stats-row {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px;
+    .logo span { color: #4f8fff; }
+    .logo small {
+      font-size: 0.7rem;
+      font-weight: 400;
+      color: #4f8fff;
+      background: rgba(79,143,255,0.15);
+      padding: 3px 12px;
+      border-radius: 12px;
+      margin-left: 8px;
     }
-    .stat-box {
-      background: rgba(22,26,38,0.75); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 20px;
-      text-align: center;
+    .badge {
+      display: inline-block;
+      background: rgba(52,211,153,0.12);
+      border: 1px solid rgba(52,211,153,0.2);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: #6ee7b7;
     }
-    .stat-value { font-size: 1.8rem; font-weight: 700; color: #fff; }
-    .stat-label { font-size: 0.68rem; color: #8890a5; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
-
-    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; }
-    .filter-bar input {
-      flex: 1; min-width: 200px; padding: 12px 16px;
-      background: rgba(22,26,38,0.75); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
-      color: #fff; font-size: 0.85rem; font-family: inherit; outline: none;
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
     }
-    .filter-bar input:focus { border-color: #4f8fff; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+    .input-group label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #8890a5;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 11px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-group input:focus {
+      border-color: #4f8fff;
+      box-shadow: 0 0 0 3px rgba(79,143,255,0.1);
+    }
+    .input-group input::placeholder {
+      color: #5a6070;
+    }
     .btn {
-      padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 0.8rem;
-      font-family: inherit; cursor: pointer; border: none; transition: all 0.2s;
-      -webkit-tap-highlight-color: transparent;
+      padding: 11px 24px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.25s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-    .btn-primary { background: #4f8fff; color: #fff; }
-    .btn-primary:hover { background: #6aa5ff; }
-    .btn-danger { background: rgba(248,113,113,0.15); border: 1px solid rgba(248,113,113,0.3); color: #f87171; }
+    .btn-primary {
+      background: #4f8fff;
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(79,143,255,0.3);
+    }
+    .btn-primary:hover { background: #6aa5ff; transform: translateY(-1px); }
+    .btn-danger {
+      background: rgba(248,113,113,0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(248,113,113,0.2);
+    }
     .btn-danger:hover { background: rgba(248,113,113,0.25); }
+    .btn-success {
+      background: rgba(52,211,153,0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(52,211,153,0.2);
+    }
+    .btn-success:hover { background: rgba(52,211,153,0.25); }
+    .btn-sm { padding: 6px 14px; font-size: 0.7rem; }
+    .btn-block { width: 100%; }
 
-    .table-card {
-      background: rgba(22,26,38,0.75); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255,255,255,0.05); border-radius: 18px; overflow: hidden;
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 10px;
     }
-    .table-header {
-      display: grid; grid-template-columns: 1.5fr 1.5fr 1.2fr 1fr 1fr 1.5fr;
-      padding: 14px 20px; background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.04);
-      font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #8890a5;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
     }
-    .table-body { max-height: 500px; overflow-y: auto; }
-    .table-row {
-      display: grid; grid-template-columns: 1.5fr 1.5fr 1.2fr 1fr 1fr 1.5fr;
-      padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 0.78rem;
-      align-items: center; transition: background 0.15s;
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      color: #8890a5;
+      font-weight: 600;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
-    .table-row:hover { background: rgba(255,255,255,0.015); }
-    .table-row:last-child { border-bottom: none; }
-    .user-cell { display: flex; align-items: center; gap: 8px; font-weight: 600; }
-    .user-av { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg,#4f8fff,#6366f1); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: #fff; }
-    .chip {
-      padding: 4px 10px; border-radius: 14px; font-size: 0.65rem; font-weight: 500;
-      display: inline-flex; align-items: center; gap: 4px;
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: #c0c8d8;
+      vertical-align: middle;
     }
-    .chip-android { background: rgba(52,211,153,0.1); color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
-    .chip-desktop { background: rgba(79,143,255,0.1); color: #4f8fff; border: 1px solid rgba(79,143,255,0.2); }
-    .time-mono { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #8890a5; }
-    .empty { text-align: center; padding: 50px 20px; color: #5a6070; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      margin-bottom: 16px;
+      display: none;
+      font-weight: 500;
+    }
+    .alert.show { display: block; }
+    .alert-success {
+      background: rgba(52,211,153,0.12);
+      border: 1px solid rgba(52,211,153,0.35);
+      color: #6ee7b7;
+    }
+    .alert-error {
+      background: rgba(248,113,113,0.12);
+      border: 1px solid rgba(248,113,113,0.35);
+      color: #fca5a5;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 0;
+      color: #5a6070;
+    }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; }
 
     .footer {
-      text-align: center; padding: 10px 0; color: #4a5060; font-size: 0.65rem;
-      letter-spacing: 0.5px; margin-top: auto;
+      text-align: center;
+      padding: 20px 0;
+      color: #5a6070;
+      font-size: 0.7rem;
     }
-    .footer span { color: #4f8fff; }
+    .footer a { color: #4f8fff; text-decoration: none; }
 
-    @media (max-width: 768px) {
-      .table-header, .table-row { grid-template-columns: 1.5fr 1.2fr 1fr 1fr; }
-      .table-header > *:nth-child(4), .table-row > *:nth-child(4),
-      .table-header > *:nth-child(6), .table-row > *:nth-child(6) { display: none; }
+    .gen-pw {
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
+    .gen-pw input { flex: 1; }
+    .gen-pw button {
+      padding: 11px 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      color: #b0b8cc;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .gen-pw button:hover {
+      background: rgba(79,143,255,0.15);
+      border-color: #4f8fff;
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .stat-item {
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
+      padding: 12px 16px;
+      text-align: center;
+    }
+    .stat-item .num { font-size: 1.5rem; font-weight: 700; color: #fff; }
+    .stat-item .label { font-size: 0.6rem; color: #8890a5; text-transform: uppercase; letter-spacing: 0.5px; }
   </style>
 </head>
 <body>
   <div class="bg-layer"></div>
-
   <div class="container">
-    <div class="header">
-      <div>
-        <div class="header-brand">SANZ<span>DEV</span> · Login Log</div>
-        <div class="header-domain">logsanz.vercel.app</div>
+    <!-- Header -->
+    <div class="card">
+      <div class="header">
+        <div class="logo">SANZ<span>DEV</span> <small>Admin Panel</small></div>
+        <span class="badge">🟢 Online</span>
       </div>
-      <div class="live-badge"><span class="live-dot"></span> LIVE — Firebase Realtime</div>
     </div>
 
-    <div class="stats-row">
-      <div class="stat-box"><div class="stat-value" id="totalLogins">0</div><div class="stat-label">Total Login</div></div>
-      <div class="stat-box"><div class="stat-value" id="uniqueDevices">0</div><div class="stat-label">Device Unik</div></div>
-      <div class="stat-box"><div class="stat-value" id="androidCount">0</div><div class="stat-label">Android</div></div>
-      <div class="stat-box"><div class="stat-value" id="desktopCount">0</div><div class="stat-label">Desktop</div></div>
+    <!-- Alert -->
+    <div class="alert alert-success" id="alertSuccess"></div>
+    <div class="alert alert-error" id="alertError"></div>
+
+    <!-- Form Generate User -->
+    <div class="card">
+      <h2>➕ Generate User Baru</h2>
+      <form id="userForm" onsubmit="handleAddUser(event)">
+        <div class="form-grid">
+          <div class="input-group">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="Masukkan username" required minlength="3" />
+          </div>
+          <div class="input-group">
+            <label>Password</label>
+            <div class="gen-pw">
+              <input type="text" id="password" placeholder="Password" required minlength="4" />
+              <button type="button" onclick="generatePassword()" title="Generate Password">🎲</button>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">➕ Tambah User</button>
+      </form>
     </div>
 
-    <div class="filter-bar">
-      <input type="text" id="searchInput" placeholder="Cari username, device, OS..." oninput="renderTable()" />
-      <button class="btn btn-primary" onclick="renderTable()">Refresh</button>
-      <button class="btn btn-danger" onclick="clearLogs()">Hapus Log</button>
-    </div>
-
-    <div class="table-card">
-      <div class="table-header">
-        <span>Username</span><span>Device</span><span>OS</span><span>IP</span><span>Browser</span><span>Waktu</span>
+    <!-- Daftar User -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+        <h2>👥 Daftar User</h2>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-danger btn-sm" onclick="deleteAllUsers()">🗑️ Hapus Semua</button>
+          <button class="btn btn-success btn-sm" onclick="exportUsers()">📤 Export</button>
+        </div>
       </div>
-      <div class="table-body" id="tableBody">
-        <div class="empty">Menghubungkan ke Firebase...</div>
+
+      <div class="stats-row" id="statsRow">
+        <div class="stat-item"><div class="num" id="totalUsers">0</div><div class="label">Total User</div></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Username</th>
+              <th>Password</th>
+              <th>Dibuat</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody">
+            <tr><td colspan="5"><div class="empty-state"><div class="icon">📭</div><p>Belum ada user. Buat user baru di atas!</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Info Login -->
+    <div class="card" style="background:rgba(79,143,255,0.05);border:1px solid rgba(79,143,255,0.15);">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="font-size:1.5rem;">🔐</span>
+        <div>
+          <div style="font-weight:600;">Link Login untuk User</div>
+          <div style="color:#8890a5;font-size:0.8rem;">
+            Buka <a href="https://sanzengine.vercel.app/" target="_blank" style="color:#4f8fff;">https://sanzengine.vercel.app/</a> 
+            dan login pakai username & password di atas
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="footer">
-      © 2026 <span>Sanz Developer</span> · logsanz.vercel.app
+      © 2026 <strong>Sanz Developer</strong> · Admin Panel v1.0
     </div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
   <script>
     (function() {
+      const DB_KEY = 'sanzdev_users';
 
-      // GANTI dengan config Firebase kamu (sama dengan yang di sanzengine.vercel.app)
-      var firebaseConfig = {
-  apiKey: "AIzaSyBxXQtr_zdh4atdliKGOZFprN3REPwvrro",
-  authDomain: "sanzdev-2006b.firebaseapp.com",
-  databaseURL: "https://sanzdev-2006b-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "sanzdev-2006b",
-  storageBucket: "sanzdev-2006b.firebasestorage.app",
-  messagingSenderId: "370279836532",
-  appId: "1:370279836532:web:cb8fcf430242047aabda21"
-};
-
-      firebase.initializeApp(firebaseConfig);
-      var db = firebase.database();
-      var allLogs = [];
-
-      function formatDateTime(iso) {
-        var d = new Date(iso);
-        var days = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
-        var months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-        var jam = String(d.getHours()).padStart(2,'0');
-        var mnt = String(d.getMinutes()).padStart(2,'0');
-        var dtk = String(d.getSeconds()).padStart(2,'0');
-        return days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ' · ' + jam + ':' + mnt + ':' + dtk;
+      function getUsers() {
+        try { return JSON.parse(localStorage.getItem(DB_KEY)) || []; }
+        catch(e) { return []; }
       }
 
-      function escapeHTML(str) {
+      function saveUsers(users) {
+        localStorage.setItem(DB_KEY, JSON.stringify(users));
+      }
+
+      function renderUsers() {
+        var users = getUsers();
+        var tbody = document.getElementById('userTableBody');
+        var total = document.getElementById('totalUsers');
+
+        total.textContent = users.length;
+
+        if (users.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="icon">📭</div><p>Belum ada user. Buat user baru di atas!</p></div></td></tr>';
+          return;
+        }
+
+        var html = '';
+        users.forEach(function(user, index) {
+          var created = user.createdAt ? new Date(user.createdAt).toLocaleDateString('id-ID') : '-';
+          html += '<tr>';
+          html += '<td>' + (index + 1) + '</td>';
+          html += '<td><strong>' + escapeHtml(user.username) + '</strong></td>';
+          html += '<td><code style="background:rgba(255,255,255,0.05);padding:4px 10px;border-radius:6px;font-size:0.8rem;">' + escapeHtml(user.password) + '</code></td>';
+          html += '<td style="font-size:0.7rem;color:#8890a5;">' + created + '</td>';
+          html += '<td><div class="actions">';
+          html += '<button class="btn btn-danger btn-sm" onclick="deleteUser(' + index + ')">Hapus</button>';
+          html += '</div></td>';
+          html += '</tr>';
+        });
+        tbody.innerHTML = html;
+      }
+
+      function escapeHtml(text) {
+        if (!text) return '';
         var div = document.createElement('div');
-        div.textContent = str || '';
+        div.textContent = text;
         return div.innerHTML;
       }
 
-      window.renderTable = function() {
-        var search = (document.getElementById('searchInput').value || '').toLowerCase();
-        var logs = allLogs;
-
-        if (search) {
-          logs = logs.filter(function(l) {
-            return (l.username||'').toLowerCase().includes(search) ||
-                   (l.device||'').toLowerCase().includes(search) ||
-                   (l.os||'').toLowerCase().includes(search) ||
-                   (l.browser||'').toLowerCase().includes(search) ||
-                   (l.ip||'').toLowerCase().includes(search);
-          });
-        }
-
-        logs.sort(function(a, b) { return new Date(b.timestamp) - new Date(a.timestamp); });
-
-        var tbody = document.getElementById('tableBody');
-        if (logs.length === 0) {
-          tbody.innerHTML = '<div class="empty">Tidak ada log ditemukan.</div>';
+      function showAlert(msg, type) {
+        var success = document.getElementById('alertSuccess');
+        var error = document.getElementById('alertError');
+        success.classList.remove('show');
+        error.classList.remove('show');
+        if (type === 'success') {
+          success.textContent = msg;
+          success.classList.add('show');
         } else {
-          tbody.innerHTML = logs.map(function(log) {
-            return '<div class="table-row">' +
-              '<div class="user-cell"><div class="user-av">' + escapeHTML((log.username||'?')[0].toUpperCase()) + '</div>' + escapeHTML(log.username||'Unknown') + '</div>' +
-              '<div>' + escapeHTML(log.device||'-') + '</div>' +
-              '<div><span class="chip ' + (log.isAndroid ? 'chip-android' : 'chip-desktop') + '">' + (log.isAndroid ? '🤖' : '💻') + ' ' + escapeHTML(log.os||'-') + ' ' + escapeHTML(log.osVersion||'') + '</span></div>' +
-              '<div style="font-family:monospace;font-size:0.7rem;">' + escapeHTML(log.ip||'-') + '</div>' +
-              '<div style="font-size:0.7rem;">' + escapeHTML(log.browser||'-') + '</div>' +
-              '<div class="time-mono">' + formatDateTime(log.timestamp) + '</div>' +
-              '</div>';
-          }).join('');
+          error.textContent = msg;
+          error.classList.add('show');
         }
+        setTimeout(function() {
+          success.classList.remove('show');
+          error.classList.remove('show');
+        }, 4000);
+      }
 
-        document.getElementById('totalLogins').textContent = allLogs.length;
-        var devices = allLogs.map(function(l) { return l.device; }).filter(function(v, i, a) { return a.indexOf(v) === i; });
-        document.getElementById('uniqueDevices').textContent = devices.length;
-        document.getElementById('androidCount').textContent = allLogs.filter(function(l) { return l.isAndroid; }).length;
-        document.getElementById('desktopCount').textContent = allLogs.filter(function(l) { return !l.isAndroid; }).length;
+      window.generatePassword = function() {
+        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+        var pw = '';
+        for (var i = 0; i < 10; i++) {
+          pw += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.getElementById('password').value = pw;
       };
 
-      window.clearLogs = function() {
-        if (confirm('Hapus semua log login dari server?')) {
-          db.ref('logs').remove();
-          allLogs = [];
-          renderTable();
+      window.handleAddUser = function(e) {
+        e.preventDefault();
+        var username = document.getElementById('username').value.trim();
+        var password = document.getElementById('password').value.trim();
+
+        if (!username || !password) {
+          return showAlert('Username dan password wajib diisi!', 'error');
         }
+        if (username.length < 3) {
+          return showAlert('Username minimal 3 karakter!', 'error');
+        }
+        if (password.length < 4) {
+          return showAlert('Password minimal 4 karakter!', 'error');
+        }
+
+        var users = getUsers();
+        // Cek duplikat
+        if (users.some(function(u) { return u.username.toLowerCase() === username.toLowerCase(); })) {
+          return showAlert('Username "' + username + '" sudah ada!', 'error');
+        }
+
+        users.push({
+          username: username,
+          password: password,
+          createdAt: new Date().toISOString()
+        });
+
+        saveUsers(users);
+        renderUsers();
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+        showAlert('User "' + username + '" berhasil ditambahkan!', 'success');
       };
 
-      // Realtime listener — setiap ada data baru langsung muncul
-      db.ref('logs').on('value', function(snapshot) {
-        var data = snapshot.val();
-        allLogs = [];
-        if (data) {
-          Object.keys(data).forEach(function(key) {
-            allLogs.push(data[key]);
-          });
-        }
-        renderTable();
-      });
+      window.deleteUser = function(index) {
+        if (!confirm('Yakin ingin menghapus user ini?')) return;
+        var users = getUsers();
+        var deleted = users[index].username;
+        users.splice(index, 1);
+        saveUsers(users);
+        renderUsers();
+        showAlert('User "' + deleted + '" berhasil dihapus.', 'success');
+      };
 
-      renderTable();
+      window.deleteAllUsers = function() {
+        if (!confirm('⚠️ Yakin ingin menghapus SEMUA user?')) return;
+        if (!confirm('Konfirmasi akhir: Hapus semua?')) return;
+        saveUsers([]);
+        renderUsers();
+        showAlert('Semua user berhasil dihapus.', 'success');
+      };
+
+      window.exportUsers = function() {
+        var users = getUsers();
+        if (users.length === 0) {
+          return showAlert('Tidak ada user untuk diexport.', 'error');
+        }
+        var data = JSON.stringify(users, null, 2);
+        var blob = new Blob([data], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'users_backup_' + new Date().toISOString().slice(0,10) + '.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        showAlert('Export berhasil!', 'success');
+      };
+
+      // Render awal
+      renderUsers();
+
+      // Proteksi
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12' || e.keyCode === 123) {
+          e.preventDefault(); return false;
+        }
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase())) {
+          e.preventDefault(); return false;
+        }
+      }, true);
+
+      document.addEventListener('contextmenu', function(e) {
+        e.preventDefault(); return false;
+      }, true);
+
+      if (window.top !== window.self) {
+        window.top.location = window.self.location;
+      }
     })();
   </script>
 </body>
